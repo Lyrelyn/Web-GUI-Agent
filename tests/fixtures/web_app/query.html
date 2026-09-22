@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Controlled query page</title>
+  </head>
+  <body>
+    <label for="query">Query</label>
+    <input id="query" data-testid="query" type="text">
+    <label for="sort">Sort</label>
+    <select id="sort" data-testid="sort">
+      <option value="relevance">Relevance</option>
+      <option value="newest">Newest</option>
+    </select>
+    <button data-testid="submit" type="button">Search</button>
+    <p data-testid="result" id="result"></p>
+    <script>
+      document.querySelector('[data-testid="submit"]').addEventListener('click', () => {
+        const query = document.querySelector('[data-testid="query"]').value;
+        const sort = document.querySelector('[data-testid="sort"]').value;
+        document.querySelector('[data-testid="result"]').textContent = `Result: ${query} (${sort})`;
+      });
+    </script>
+  </body>
+</html>

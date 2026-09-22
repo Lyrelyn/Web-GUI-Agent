@@ -27,9 +27,11 @@ class ObservationBuilder:
                         if (el.getAttribute('role')) hints.push({strategy: 'role', value: el.getAttribute('role')});
                         const text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim();
                         if (text) hints.push({strategy: 'text', value: text});
-                        return {element_id: id, role: el.getAttribute('role'), name: text || null, kind: kindFor(el), visible: true, enabled: true, locator_hints: hints};
+                        const isSecret = el instanceof HTMLInputElement && el.type === 'password';
+                        return {element_id: id, role: el.getAttribute('role'), name: text || null, kind: kindFor(el), visible: true, enabled: true, value: isSecret ? null : (el.value || null), locator_hints: hints};
                     });
-                return {elements, text: body.innerText, viewport: {width: innerWidth, height: innerHeight, scroll_y: scrollY}};
+                const hasError = Boolean(body.querySelector('[role="alert"], .error, .alert-error, [data-error="true"]'));
+                return {elements, text: body.innerText, viewport: {width: innerWidth, height: innerHeight, scroll_y: scrollY}, signals: {has_error: hasError}};
             }"""
         )
         return Observation(
@@ -38,6 +40,6 @@ class ObservationBuilder:
             viewport=Viewport.model_validate(payload["viewport"]),
             elements=[ElementCandidate.model_validate(element) for element in payload["elements"]],
             text_summary=str(payload["text"]),
-            page_signals=PageSignals(),
+            page_signals=PageSignals.model_validate(payload.get("signals", {})),
             captured_at=datetime.now(UTC),
         )

@@ -21,7 +21,7 @@ class BrowserWorker:
             await self._page.goto(url, wait_until="domcontentloaded", timeout=self._timeout_ms)
             return ToolResult(ok=True, summary="Navigated.")
         except PlaywrightTimeoutError:
-            return self._error(ErrorCode.ACTION_TIMEOUT, "Navigation timed out.")
+            return self._error(ErrorCode.ACTION_TIMEOUT, "Navigation timed out.", retryable=True)
         except Error:
             return self._error(ErrorCode.BROWSER_CRASHED, "Browser navigation failed.")
 
@@ -40,9 +40,11 @@ class BrowserWorker:
             data = await (locator.get_attribute(attribute) if attribute else locator.inner_text())
             return ToolResult(ok=True, summary=f"Extracted {element.element_id}.", data=data)
         except LocatorResolutionError:
-            return self._error(ErrorCode.LOCATOR_NOT_FOUND, "Element was not found.")
+            return self._error(
+                ErrorCode.LOCATOR_NOT_FOUND, "Element was not found.", retryable=True
+            )
         except PlaywrightTimeoutError:
-            return self._error(ErrorCode.ACTION_TIMEOUT, "Extraction timed out.")
+            return self._error(ErrorCode.ACTION_TIMEOUT, "Extraction timed out.", retryable=True)
         except Error:
             return self._error(ErrorCode.BROWSER_CRASHED, "Browser extraction failed.")
 
@@ -65,12 +67,20 @@ class BrowserWorker:
                 await operation(value, timeout=self._timeout_ms)
             return ToolResult(ok=True, summary=f"Completed {method} on {element.element_id}.")
         except LocatorResolutionError:
-            return self._error(ErrorCode.LOCATOR_NOT_FOUND, "Element was not found.")
+            return self._error(
+                ErrorCode.LOCATOR_NOT_FOUND, "Element was not found.", retryable=True
+            )
         except PlaywrightTimeoutError:
-            return self._error(ErrorCode.ACTION_TIMEOUT, "Browser operation timed out.")
+            return self._error(
+                ErrorCode.ACTION_TIMEOUT, "Browser operation timed out.", retryable=True
+            )
         except Error:
             return self._error(ErrorCode.BROWSER_CRASHED, "Browser operation failed.")
 
     @staticmethod
-    def _error(code: ErrorCode, message: str) -> ToolResult:
-        return ToolResult(ok=False, summary=message, error=AgentError(code=code, message=message))
+    def _error(code: ErrorCode, message: str, *, retryable: bool = False) -> ToolResult:
+        return ToolResult(
+            ok=False,
+            summary=message,
+            error=AgentError(code=code, message=message, retryable=retryable),
+        )

@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     max_concurrent_runs: int = Field(default=2, ge=1, le=16)
     default_timeout_ms: int = Field(default=120_000, ge=1_000, le=600_000)
     default_max_retries: int = Field(default=2, ge=0, le=10)
+    deepseek_api_key: str | None = None
+    deepseek_base_url: str = "https://api.deepseek.com/v1"
+    deepseek_model: str = "deepseek-chat"
 
 
 @lru_cache

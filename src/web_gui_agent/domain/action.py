@@ -57,6 +57,7 @@ class ScrollAction(BaseModel):
 class FinishAction(BaseModel):
     kind: Literal["finish"]
     summary: str = Field(min_length=1)
+    expected_text: str | None = Field(default=None, min_length=1)
 
 
 Action = Annotated[

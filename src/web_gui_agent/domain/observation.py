@@ -37,6 +37,7 @@ class ElementCandidate(BaseModel):
     kind: Literal["link", "button", "input", "select", "textarea", "text", "other"]
     visible: bool
     enabled: bool | None = None
+    value: str | None = None
     locator_hints: list[LocatorHint] = Field(default_factory=_empty_locator_hints)
 
 
