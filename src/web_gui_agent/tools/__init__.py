@@ -1,0 +1,1 @@
+"""Whitelisted browser action dispatch."""
